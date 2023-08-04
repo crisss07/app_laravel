@@ -9,6 +9,7 @@
     use JWTAuth;
     use Tymon\JWTAuth\Exceptions\JWTException;
     use Illuminate\Support\Facades\Auth;
+    use Illuminate\Support\Facades\DB;
 
 
 class UserController extends Controller
@@ -68,32 +69,37 @@ class UserController extends Controller
     public function prueba()
     {
         // echo 'prueba';
-        $user = UserDescription::get();
+        // $user = UserDescription::get();
+        // $user = DB::table('users')->get();
         // $user = User::get();
         // $o_productoss = User::get()->toArray();
         // $users = User::get();
         // dd($o_productos);
+        $user = DB::table('users')
+            ->join('user_descriptions', 'users.id', '=', 'user_descriptions.user_id')
+            ->select('users.*', 'user_descriptions.*')
+            ->get();
 
         return response()->json(['usuarios' => $user], 200);
     }
 
-    public function logout(Request $request) {
-        dd($this->validate($request, ['token' => 'required']));
-
-        // $this->validate($request, ['token' => 'required']);
-
-        
-        // try {
-        //     JWTAuth::invalidate($request->input('token'));
-        //     return response([
-        //     'status' => 'success',
-        //     'msg' => 'You have successfully logged out.'
-        // ]);
-        // } catch (JWTException $e) {
-        //     return response([
-        //         'status' => 'error',
-        //         'msg' => 'Failed to logout, please try again.'
-        //     ]);
-        // }
+    public function logout(Request $request)
+    {
+        $this->validate($request, ['token' => 'required']);
+        try {
+            JWTAuth::invalidate($request->input('token'));
+            return response([
+                'status' => 'success',
+                'msg' => 'You have successfully logged out.'
+            ]);
+        } catch (JWTException $e) {
+            return response([
+                'status' => 'error',
+                'msg' => 'Failed to logout, please try again.'
+            ]);
+        }
     }
+
+
+
 }
